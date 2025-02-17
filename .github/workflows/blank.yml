@@ -9,36 +9,34 @@ on:
       - main  # Ou a branch que quiseres monitorizar
 
 permissions:
-  contents: read      # Necessário para ler o código fonte do repositório
-  actions: read       # Permissão para interagir com ações e workflows
-  issues: write       # (Opcional) Permissão para escrever em issues, se necessário
-  pull-requests: write # (Opcional) Permissão para interagir com pull requests, se necessário
+  contents: read 
+  id-token: write 
+  issues: write 
+  pull-requests: write
 
-jobs:
-  trufflehog:
-    runs-on: ubuntu-latest
+jobs: 
+  TruffleHog: 
+    runs-on: ubuntu-latest 
+    defaults: 
+      run: 
+        shell: bash 
+    steps: 
+      - name: Checkout code 
+        uses: actions/checkout@v3 
+        with: 
+          fetch-depth: 0
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: TruffleHog OSS 
+        id: trufflehog 
+        uses: trufflesecurity/trufflehog@add-actions-cli-switch 
+        continue-on-error: true 
+        with: 
+          path: ./ 
+          base: "${{ github.event.repository.default_branch }}" 
+          head: HEAD 
+          extra_args: --debug --only-verified ﻿
+          
+      - name: Scan Results Status 
+        if: steps.trufflehog.outcome == 'failure' 
+        run: exit 1
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install trufflehog
-
-      - name: Run TruffleHog
-        run: |
-          trufflehog --json https://github.com/${{ github.repository }} > trufflehog_output.json
-          cat trufflehog_output.json
-
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: trufflehog-results
-          path: trufflehog_output.json
