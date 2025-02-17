@@ -1,0 +1,44 @@
+name: Run TruffleHog
+
+on:
+  push:
+    branches:
+      - main  # Ou a branch que quiseres monitorizar
+  pull_request:
+    branches:
+      - main  # Ou a branch que quiseres monitorizar
+
+permissions:
+  contents: read      # Necessário para ler o código fonte do repositório
+  actions: read       # Permissão para interagir com ações e workflows
+  issues: write       # (Opcional) Permissão para escrever em issues, se necessário
+  pull-requests: write # (Opcional) Permissão para interagir com pull requests, se necessário
+
+jobs:
+  trufflehog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install trufflehog
+
+      - name: Run TruffleHog
+        run: |
+          trufflehog --json https://github.com/${{ github.repository }} > trufflehog_output.json
+          cat trufflehog_output.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: trufflehog-results
+          path: trufflehog_output.json
