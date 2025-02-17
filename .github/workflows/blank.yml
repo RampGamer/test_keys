@@ -15,9 +15,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Secret Scanning
-      uses: trufflesecurity/trufflehog@main
-      with:
-        extra_args: --results=verified,unknown
+      uses: trufflesecurity/trufflehog@v3.88.9
           
     - name: Scan Results Status 
       if: steps.trufflehog.outcome == 'failure' 
