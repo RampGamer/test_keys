@@ -26,9 +26,8 @@ jobs:
         with: 
           fetch-depth: 0
 
-      - name: TruffleHog OSS 
-        id: trufflehog 
-        uses: trufflesecurity/trufflehog@add-actions-cli-switch 
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.88.9 
         continue-on-error: true 
         with: 
           path: ./ 
